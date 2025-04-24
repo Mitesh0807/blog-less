@@ -1,0 +1,103 @@
+# Node.js
+# Ignore the dependency directory
+node_modules/
+
+# Ignore logs and debug files
+npm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Ignore production build directory often created by bundlers
+dist/
+build/
+
+# Ignore coverage reports
+coverage/
+
+# Ignore test coverage
+.nyc_output/
+
+# Ignore compiled binary addons
+build/Release
+
+# Optional npm cache directory
+.npm/
+
+# Optional REPL history
+.node_repl_history
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# A yarn cache directory, if you're using Yarn 2 or higher
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Next.js
+# Ignore the Next.js build output
+.next/
+out/
+
+# Ignore the Next.js build trace
+.next/trace
+
+# Ignore Vercel artifacts (if deploying to Vercel)
+.vercel/
+
+# Ignore editor directories and files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.cursor
+
+# macOS
+.DS_Store
+
+# Thumbnails
+._*
+
+# Crashes
+**/hs_err_pid*
+
+# Diffs
+*.diff
+*.patch
+
+# Tags
+TAGS
+
+# Unit test results
+junit.xml
+test-results.xml
+
+# dotenv files
+.env*.local
+
+# Debugger files
+*.log
+.eslintcache
+.stylelintcache
+
+
+# Optional: Ignore specific files if they are generated and not part of the source
+# For example, if you have a generated sitemap:
+# public/sitemap.xml
+
+# Optional: Ignore dependency lock files if you manage them manually or
+# if your package manager handles them in a specific way that doesn't
+# require committing them (less common)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
