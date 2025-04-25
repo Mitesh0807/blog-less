@@ -5,6 +5,7 @@ import config from "../config/config";
 
 export interface IUser extends Document {
   name: string;
+  username: string;
   email: string;
   password: string;
   role: "user" | "admin";
@@ -25,6 +26,18 @@ const userSchema = new Schema<IUser>(
       required: [true, "Please provide your name"],
       trim: true,
       maxlength: [50, "Name cannot exceed 50 characters"],
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      unique: true,
+      trim: true,
+      minlength: [3, "Username must be at least 3 characters long"],
+      maxlength: [30, "Username cannot exceed 30 characters"],
+      match: [
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores",
+      ],
     },
     email: {
       type: String,
@@ -53,8 +66,12 @@ const userSchema = new Schema<IUser>(
       type: String,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  },
 );
+userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
