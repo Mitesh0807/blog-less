@@ -21,6 +21,15 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use("/api/auth", authRoutes);
 
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date(),
+    environment: config.NODE_ENV,
+  });
+});
+
 app.get(
   "/",
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -46,6 +55,22 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-app.listen(config.PORT, () => {
+const server = app.listen(config.PORT, () => {
   logger.info(`Server is up and running on port ${config.PORT}`);
+});
+
+process.on("SIGTERM", () => {
+  logger.info("SIGTERM signal received. Shutting down gracefully.");
+  server.close(() => {
+    logger.info("Closed out remaining connections.");
+    process.exit(0);
+  });
+});
+
+process.on("SIGINT", () => {
+  logger.info("SIGINT signal received (Ctrl+C).");
+  server.close(() => {
+    logger.info("Server closed.");
+    process.exit(0);
+  });
 });
