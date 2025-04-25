@@ -11,7 +11,7 @@ lerna-debug.log*
 # Ignore production build directory often created by bundlers
 dist/
 build/
-
+logs/
 # Ignore coverage reports
 coverage/
 
