@@ -23,7 +23,7 @@ export const protect = async (
   req: Request,
   res: Response,
   next: NextFunction,
-) => {
+): Promise<void> => {
   try {
     let token;
 
@@ -46,7 +46,6 @@ export const protect = async (
     }
 
     try {
-      //TODO: types
       const decoded = jwt.verify(token, config.JWT_SECRET) as JwtPayload;
 
       const user = await User.findById(decoded.id);
@@ -77,19 +76,21 @@ export const protect = async (
 };
 
 export const authorize = (...roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Not authorized to access this route",
       });
+      return;
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: `User role '${req.user.role}' is not authorized to access this route`,
       });
+      return;
     }
 
     next();

@@ -2,6 +2,9 @@ import express, { Request, Response, NextFunction, Express } from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/database";
 import authRoutes from "./routes/authRoutes";
+import postRoutes from "./routes/postRoutes";
+import tagRoutes from "./routes/tagRoutes";
+import profileRoutes from "./routes/profileRoutes";
 import logger from "./utils/logger";
 import config, { bootstrapConfig } from "./config/config";
 
@@ -20,6 +23,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/tags", tagRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({
@@ -45,13 +51,21 @@ app.get(
   },
 );
 
+app.use((req: Request, res: Response) => {
+  logger.warn(`Route not found: ${req.originalUrl}`);
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.originalUrl}`
+  });
+});
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error(`Error: ${err.message}`, { stack: err.stack });
 
   res.status(500).json({
     success: false,
-    message: "Server Error",
-    error: config.NODE_ENV === "development" ? err.message : undefined,
+    message: 'Server Error',
+    error: config.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
