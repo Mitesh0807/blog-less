@@ -83,12 +83,12 @@ export default function Header() {
               </div>
             ) : (
               <>
-                <Link href="/auth/login">
+                <Link href="/login">
                   <Button variant="outline" size="sm">
                     Log in
                   </Button>
                 </Link>
-                <Link href="/auth/register">
+                <Link href="/register">
                   <Button size="sm">Sign up</Button>
                 </Link>
               </>
@@ -152,10 +152,10 @@ export default function Header() {
             )}
             {!isAuthPage && !user && !isLoading && (
               <div className="pt-2 border-t">
-                <Link href="/auth/login" className="block py-2">
+                <Link href="/login" className="block py-2">
                   Log in
                 </Link>
-                <Link href="/auth/register" className="block py-2">
+                <Link href="/register" className="block py-2">
                   Sign up
                 </Link>
               </div>

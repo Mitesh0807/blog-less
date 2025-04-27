@@ -237,7 +237,7 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
         ) : (
           <p>
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-blue-600 hover:underline">
+            <Link href="/login" className="text-blue-600 hover:underline">
               Sign in
             </Link>
           </p>
