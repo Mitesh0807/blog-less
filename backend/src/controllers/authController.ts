@@ -8,6 +8,7 @@ interface RegisterRequestBody {
   email: string;
   password: string;
   bio?: string;
+  username: string;
 }
 
 interface LoginRequestBody {
@@ -17,7 +18,7 @@ interface LoginRequestBody {
 
 const cookieOptions = {
   expires: new Date(
-    Date.now() + config.COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    Date.now() + config.COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
   ),
   httpOnly: true,
   secure: config.NODE_ENV === "production",
@@ -45,7 +46,7 @@ export const register = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, email, password, bio } = req.body;
+    const { name, email, password, bio, username } = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -62,6 +63,7 @@ export const register = async (
       email,
       password,
       bio,
+      username,
     });
 
     logger.info(`New user registered: ${email}`);
@@ -82,7 +84,7 @@ export const login = async (
     const { email, password } = req.body;
 
     if (!email || !password) {
-      logger.warn('Login attempt without email or password');
+      logger.warn("Login attempt without email or password");
       res.status(400).json({
         success: false,
         message: "Please provide email and password",
