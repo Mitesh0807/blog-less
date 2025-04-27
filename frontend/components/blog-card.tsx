@@ -1,25 +1,9 @@
+'use client';
+
 import Link from "next/link";
 import Image from "next/image";
+import { Post } from "@/app/api";
 import { formatDate } from "@/lib/utils";
-
-export interface Author {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
-
-export interface Post {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  coverImage?: string;
-  publishedAt: string;
-  authorId: string;
-  author: Author;
-}
 
 interface BlogCardProps {
   post: Post;
@@ -31,7 +15,7 @@ export default function BlogCard({ post }: BlogCardProps) {
       <Link href={`/blog/${post.slug}`}>
         <div className="aspect-video relative">
           <Image
-            src={post.coverImage || "/placeholder.svg?height=240&width=480"}
+            src={post.coverImage || "/images/placeholder.jpg"}
             alt={post.title}
             fill
             className="object-cover"
@@ -40,19 +24,16 @@ export default function BlogCard({ post }: BlogCardProps) {
       </Link>
       <div className="p-6">
         <div className="flex items-center gap-2 mb-3 text-sm text-slate-600">
-          <div className="w-6 h-6 rounded-full overflow-hidden">
-            <Image
-              src={post.author.avatar || "/placeholder.svg?height=24&width=24"}
-              alt={post.author.name}
-              width={24}
-              height={24}
-              className="object-cover"
-            />
+          <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-200">
+            {post.author && (
+              <div className="flex items-center">
+                <span>{post.author.name}</span>
+              </div>
+            )}
           </div>
-          <span>{post.author.name}</span>
           <span>•</span>
-          <time dateTime={post.publishedAt}>
-            {formatDate(post.publishedAt)}
+          <time dateTime={post.publishedAt || post.createdAt}>
+            {formatDate(post.publishedAt || post.createdAt)}
           </time>
         </div>
         <Link href={`/blog/${post.slug}`}>
@@ -61,12 +42,28 @@ export default function BlogCard({ post }: BlogCardProps) {
           </h3>
         </Link>
         <p className="text-slate-600 line-clamp-2 mb-4">{post.excerpt}</p>
-        <Link
-          href={`/blog/${post.slug}`}
-          className="text-black font-medium hover:underline"
-        >
-          Read more
-        </Link>
+        <div className="flex justify-between items-center">
+          <Link
+            href={`/blog/${post.slug}`}
+            className="text-black font-medium hover:underline"
+          >
+            Read more
+          </Link>
+
+          {post.tags && post.tags.length > 0 && (
+            <div className="flex gap-2">
+              {post.tags.slice(0, 2).map((tag) => (
+                <Link
+                  key={tag}
+                  href={`/blog/tag/${tag}`}
+                  className="text-xs bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 transition-colors"
+                >
+                  {tag}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,212 @@
+import { postApi, Post, PostParams } from "../app/api";
+import { PostSearchParams } from "../app/api/postApi";
+//TODO:zod or valibot
+function convertParams(params: PostParams): PostSearchParams {
+  return {
+    page: params.page,
+    limit: params.limit,
+    sort: params.sort,
+    author: params.author,
+    tag: params.tag,
+    status: params.status as "draft" | "published" | undefined,
+    featured: params.featured,
+    search: params.search,
+  };
+}
+
+export async function getAllPosts(params: PostParams = {}): Promise<Post[]> {
+  try {
+    const response = await postApi.getPosts(convertParams(params));
+
+    if (response && response.data) {
+      return response.data.map((post) => ({
+        id: post._id,
+        title: post.title,
+        excerpt: post.summary,
+        slug: post.slug,
+        content: post.content,
+        viewCount: post.views,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        publishedAt: post.publishedAt,
+        author: post.author
+          ? {
+              id: post.author._id,
+              name: post.author.name,
+              username: post.author.username,
+            }
+          : undefined,
+        tags: post.tags,
+        commentCount: 0,
+        likeCount: post.likes?.length || 0,
+        status: post.status,
+        coverImage: "/images/placeholder.jpg",
+        readingTime: post.readingTime,
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return [];
+  }
+}
+
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    const response = await postApi.getPost(slug);
+
+    if (response && response.data) {
+      const post = response.data;
+      return {
+        id: post._id,
+        title: post.title,
+        excerpt: post.summary,
+        slug: post.slug,
+        content: post.content,
+        viewCount: post.views,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        publishedAt: post.publishedAt,
+        author: post.author
+          ? {
+              id: post.author._id,
+              name: post.author.name,
+              username: post.author.username,
+            }
+          : undefined,
+        tags: post.tags,
+        commentCount: 0,
+        likeCount: post.likes?.length || 0,
+        status: post.status,
+        coverImage: "/images/placeholder.jpg",
+        readingTime:
+          post.readingTime || Math.ceil(post.content.split(/\s+/).length / 200),
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error fetching post with slug ${slug}:`, error);
+    return null;
+  }
+}
+
+export async function getFeaturedPosts(): Promise<Post[]> {
+  try {
+    const response = await postApi.getFeaturedPosts();
+
+    if (response && response.data) {
+      return response.data.map((post) => ({
+        id: post._id,
+        title: post.title,
+        excerpt: post.summary,
+        slug: post.slug,
+        content: post.content,
+        viewCount: post.views,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        publishedAt: post.publishedAt,
+        author: post.author
+          ? {
+              id: post.author._id,
+              name: post.author.name,
+              username: post.author.username,
+            }
+          : undefined,
+        tags: post.tags,
+        commentCount: 0,
+        likeCount: post.likes?.length || 0,
+        status: post.status,
+        coverImage: "/images/placeholder.jpg",
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error("Error fetching featured posts:", error);
+    return [];
+  }
+}
+
+export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
+  try {
+    const response = await postApi.getPosts({ author: authorId });
+
+    if (response && response.data) {
+      return response.data.map((post: any) => ({
+        id: post._id || post.id,
+        title: post.title,
+        excerpt: post.summary || post.excerpt,
+        slug: post.slug,
+        content: post.content,
+        viewCount: post.views || 0,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        publishedAt: post.publishedAt,
+        author: post.author
+          ? {
+              id: post.author._id || post.author.id,
+              name: post.author.name,
+              username: post.author.username,
+            }
+          : undefined,
+        tags: post.tags || [],
+        commentCount: post.commentCount || 0,
+        likeCount: post.likes?.length || 0,
+        status: post.status,
+        coverImage:
+          post.featuredImageUrl || post.coverImage || "/images/placeholder.jpg",
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error(`Error fetching posts by author ${authorId}:`, error);
+    return [];
+  }
+}
+
+export async function getPostsByTag(tag: string): Promise<Post[]> {
+  try {
+    const response = await postApi.getPosts(convertParams({ tag }));
+
+    if (response && response.data) {
+      return response.data.map((post) => ({
+        id: post._id,
+        title: post.title,
+        excerpt: post.summary,
+        slug: post.slug,
+        content: post.content,
+        viewCount: post.views,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        publishedAt: post.publishedAt,
+        author: post.author
+          ? {
+              id: post.author._id,
+              name: post.author.name,
+              username: post.author.username,
+            }
+          : undefined,
+        tags: post.tags,
+        commentCount: 0,
+        likeCount: post.likes?.length || 0,
+        status: post.status,
+        coverImage: "/images/placeholder.jpg",
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error(`Error fetching posts with tag ${tag}:`, error);
+    return [];
+  }
+}
+
+export function formatPost(post: any): Post {
+  return {
+    ...post,
+    id: post._id,
+    author: {
+      id: post.author._id,
+      name: post.author.name,
+      username: post.author.username,
+    },
+  };
+}
