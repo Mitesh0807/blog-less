@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # MongoDB Service
@@ -11,7 +11,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=rootpassword
       - MONGO_INITDB_DATABASE=blog-less
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -36,10 +36,11 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=8080
-      - MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blog-less?authSource=admin
+      - MONGODB_URI=mongodb://mongodb:27017/blog-less
       - JWT_SECRET=your_jwt_secret_key
       - JWT_ALGORITHM=HS256
       - CORS_ORIGIN=http://localhost:3000
+      - FRONTEND_URL=http://localhost:3000
     ports:
       - "8080:8080"
     volumes:
