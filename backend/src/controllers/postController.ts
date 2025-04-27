@@ -564,3 +564,108 @@ export const getUserPostsStats = async (
     next(error);
   }
 };
+
+export const getPostById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate("author", "name username bio profilePicture")
+      .populate({
+        path: "likes",
+        select: "name username",
+      });
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    const postAuthor = post.author as unknown as {
+      _id: mongoose.Types.ObjectId;
+    };
+    const user = req.user as
+      | (IUser & { _id: mongoose.Types.ObjectId })
+      | undefined;
+
+    if (
+      post.status !== "published" &&
+      (!user ||
+        (user._id.toString() !== postAuthor._id.toString() &&
+          user.role !== "admin"))
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to view this post",
+      });
+    }
+
+    post.views += 1;
+    await post.save();
+
+    const postId = post._id as mongoose.Types.ObjectId;
+    const relatedPosts = await Post.findRelated(postId.toString());
+
+    const comments = await Comment.find({ post: post._id, parent: null })
+      .populate("author", "name username profilePicture")
+      .sort("-createdAt");
+
+    res.status(200).json({
+      success: true,
+      data: post,
+      relatedPosts,
+      comments,
+    });
+  } catch (error: any) {
+    logger.error(`Error getting post by ID: ${error.message}`, error);
+    next(error);
+  }
+};
+
+export const getPostsByIds = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.body.ids || !Array.isArray(req.body.ids)) {
+      return res.status(400).json({
+        success: false,
+        message: "Post IDs are required and must be an array",
+      });
+    }
+
+    const { ids } = req.body;
+
+    const validIds = ids.filter((id: string) =>
+      mongoose.Types.ObjectId.isValid(id),
+    );
+
+    if (validIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid post IDs provided",
+      });
+    }
+
+    const posts = await Post.find({
+      _id: { $in: validIds },
+      status: "published",
+    })
+      .populate("author", "name username bio")
+      .sort("-publishedAt");
+
+    res.status(200).json({
+      success: true,
+      count: posts.length,
+      data: posts,
+    });
+  } catch (error: any) {
+    logger.error(`Error getting posts by IDs: ${error.message}`, error);
+    next(error);
+  }
+};
