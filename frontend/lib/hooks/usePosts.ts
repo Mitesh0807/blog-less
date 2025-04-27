@@ -128,7 +128,7 @@ export function useDeletePost() {
 
   return useMutation({
     mutationFn: async (postId: string) => {
-      const response = await api.delete(`/posts/${id}`);
+      const response = await api.delete(`/posts/${postId}`);
       return response.data;
     },
     onSuccess: () => {
