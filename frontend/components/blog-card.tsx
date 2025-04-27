@@ -10,7 +10,6 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ post }: BlogCardProps) {
-  console.log(post, "post");
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm border hover:shadow-md transition-shadow">
       <Link href={`/blog/${post.slug}`}>
