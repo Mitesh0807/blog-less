@@ -1,8 +1,6 @@
 "use client";
 
 import { useFeaturedPosts, usePosts } from "@/lib/hooks/usePosts";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
 import BlogCard from "@/components/blog-card";
 import Link from "next/link";
 

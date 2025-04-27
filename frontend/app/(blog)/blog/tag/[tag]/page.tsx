@@ -42,6 +42,7 @@ function generateFilterUrl(
   });
 
   const queryString = Object.entries(params)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([_, v]) => v !== undefined)
     .map(
       ([key, value]) =>
@@ -179,7 +180,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-slate-800">No posts found</h2>
           <p className="text-slate-600 mt-2">
-            No posts with the tag "{tag}" were found.
+            No posts with the tag &quot;{tag}&quot; were found.
             <Link href="/blog" className="text-blue-600 hover:underline ml-1">
               View all posts
             </Link>

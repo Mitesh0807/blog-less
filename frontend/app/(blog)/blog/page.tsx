@@ -29,6 +29,7 @@ function generateFilterUrl(
   });
 
   const queryString = Object.entries(params)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .filter(([_, v]) => v !== undefined)
     .map(
       ([key, value]) =>
@@ -69,7 +70,9 @@ export default async function BlogPage({
     search?: string;
   };
 }) {
-  const page = searchParams.page ? parseInt(searchParams.page) : 1;
+  const page = (await searchParams.page)
+    ? parseInt((await searchParams.page) ?? "1")
+    : 1;
   const tag = parseAsString.parseServerSide(searchParams.tag) || undefined;
   const author =
     parseAsString.parseServerSide(searchParams.author) || undefined;
