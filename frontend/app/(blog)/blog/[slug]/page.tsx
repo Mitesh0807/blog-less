@@ -9,9 +9,9 @@ import { formatDate, getReadingTime, formatViewCount } from "@/lib/utils";
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const slug = params.slug;
+  const slug = (await params).slug;
 
   const post = await getPostBySlug(slug);
 
@@ -40,9 +40,9 @@ export async function generateMetadata({
 export default async function BlogPostPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const slug = params.slug;
+  const slug = (await params).slug;
 
   const post = await getPostBySlug(slug);
 
@@ -59,7 +59,6 @@ export default async function BlogPostPage({
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-8">
-      {/* Back button */}
       <div className="mb-8">
         <Link href="/blog">
           <Button variant="ghost" size="sm">
@@ -83,7 +82,6 @@ export default async function BlogPostPage({
         </Link>
       </div>
 
-      {/* Post header */}
       <header className="mb-8">
         <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
 
@@ -127,7 +125,6 @@ export default async function BlogPostPage({
         )}
       </header>
 
-      {/* Cover image */}
       {post.coverImage && (
         <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden">
           <BlogImage
@@ -141,13 +138,11 @@ export default async function BlogPostPage({
         </div>
       )}
 
-      {/* Post content */}
       <div
         className="prose prose-slate max-w-none"
         dangerouslySetInnerHTML={{ __html: post.content }}
       />
 
-      {/* Post footer */}
       <div className="mt-12 pt-8 border-t">
         <div className="flex justify-between items-center">
           <div>

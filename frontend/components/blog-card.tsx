@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Post } from "@/app/api";
 import { formatDate } from "@/lib/utils";
+import { BlogImage } from "./blog-image";
 
 interface BlogCardProps {
   post: Post;
 }
 
 export default function BlogCard({ post }: BlogCardProps) {
+  console.log(post, "post");
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm border hover:shadow-md transition-shadow">
       <Link href={`/blog/${post.slug}`}>
         <div className="aspect-video relative">
-          <Image
+          <BlogImage
             src={post.coverImage || "/images/placeholder.jpg"}
             alt={post.title}
             fill
-            className="object-cover"
+            quality="low"
+            aspectRatio="16/9"
           />
         </div>
       </Link>

@@ -4,10 +4,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { Post, PaginatedResponse } from "@/lib/types";
 
+export type PostFilters = {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  author?: string;
+  tag?: string;
+  featured?: boolean;
+  search?: string;
+};
+
 export const postKeys = {
   all: ["posts"] as const,
   lists: () => [...postKeys.all, "list"] as const,
-  list: (filters: Record<string, any>) =>
+  list: (filters: PostFilters) =>
     [...postKeys.lists(), filters] as const,
   details: () => [...postKeys.all, "detail"] as const,
   detail: (slug: string) => [...postKeys.details(), slug] as const,
@@ -15,17 +25,7 @@ export const postKeys = {
   recommended: () => [...postKeys.all, "recommended"] as const,
 };
 
-export function usePosts(
-  params: {
-    page?: number;
-    limit?: number;
-    sort?: string;
-    author?: string;
-    tag?: string;
-    featured?: boolean;
-    search?: string;
-  } = {},
-) {
+export function usePosts(params: PostFilters = {}) {
   return useQuery({
     queryKey: postKeys.list(params),
     queryFn: async () => {
@@ -89,7 +89,7 @@ export function useLikePost() {
       const response = await api.put(`/posts/${postId}/like`);
       return response.data;
     },
-    onSuccess: (_, postId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: postKeys.all });
     },
   });
@@ -117,7 +117,7 @@ export function useUpdatePost() {
       const response = await api.put(`/posts/${id}`, data);
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: postKeys.all });
     },
   });

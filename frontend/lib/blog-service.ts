@@ -1,5 +1,36 @@
 import { postApi, Post, PostParams } from "../app/api";
 import { PostSearchParams } from "../app/api/postApi";
+
+// Define proper types for API responses
+interface ApiAuthor {
+  _id: string;
+  name: string;
+  username: string;
+  bio?: string;
+  profilePicture?: string;
+}
+
+interface ApiPost {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  summary?: string;
+  excerpt?: string;
+  views: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  author: ApiAuthor;
+  tags: string[];
+  likes?: string[];
+  readingTime?: number;
+  commentCount?: number;
+  featuredImageUrl?: string;
+  coverImage?: string;
+}
+
 //TODO:zod or valibot
 function convertParams(params: PostParams): PostSearchParams {
   return {
@@ -19,8 +50,8 @@ export async function getAllPosts(params: PostParams = {}): Promise<Post[]> {
     const response = await postApi.getPosts(convertParams(params));
 
     if (response && response.data) {
-      return response.data.map((post) => ({
-        id: post._id,
+      return response.data.map((post): Post => ({
+        _id: post._id,
         title: post.title,
         excerpt: post.summary,
         slug: post.slug,
@@ -31,7 +62,7 @@ export async function getAllPosts(params: PostParams = {}): Promise<Post[]> {
         publishedAt: post.publishedAt,
         author: post.author
           ? {
-              id: post.author._id,
+              _id: post.author._id,
               name: post.author.name,
               username: post.author.username,
             }
@@ -39,7 +70,7 @@ export async function getAllPosts(params: PostParams = {}): Promise<Post[]> {
         tags: post.tags,
         commentCount: 0,
         likeCount: post.likes?.length || 0,
-        status: post.status,
+        status: post.status as "draft" | "published",
         coverImage: "/images/placeholder.jpg",
         readingTime: post.readingTime,
       }));
@@ -58,7 +89,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     if (response && response.data) {
       const post = response.data;
       return {
-        id: post._id,
+        _id: post._id,
         title: post.title,
         excerpt: post.summary,
         slug: post.slug,
@@ -69,7 +100,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
         publishedAt: post.publishedAt,
         author: post.author
           ? {
-              id: post.author._id,
+              _id: post.author._id,
               name: post.author.name,
               username: post.author.username,
             }
@@ -77,7 +108,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
         tags: post.tags,
         commentCount: 0,
         likeCount: post.likes?.length || 0,
-        status: post.status,
+        status: post.status as "draft" | "published",
         coverImage: "/images/placeholder.jpg",
         readingTime:
           post.readingTime || Math.ceil(post.content.split(/\s+/).length / 200),
@@ -95,8 +126,8 @@ export async function getFeaturedPosts(): Promise<Post[]> {
     const response = await postApi.getFeaturedPosts();
 
     if (response && response.data) {
-      return response.data.map((post) => ({
-        id: post._id,
+      return response.data.map((post): Post => ({
+        _id: post._id,
         title: post.title,
         excerpt: post.summary,
         slug: post.slug,
@@ -107,7 +138,7 @@ export async function getFeaturedPosts(): Promise<Post[]> {
         publishedAt: post.publishedAt,
         author: post.author
           ? {
-              id: post.author._id,
+              _id: post.author._id,
               name: post.author.name,
               username: post.author.username,
             }
@@ -115,7 +146,7 @@ export async function getFeaturedPosts(): Promise<Post[]> {
         tags: post.tags,
         commentCount: 0,
         likeCount: post.likes?.length || 0,
-        status: post.status,
+        status: post.status as "draft" | "published",
         coverImage: "/images/placeholder.jpg",
       }));
     }
@@ -131,8 +162,8 @@ export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
     const response = await postApi.getPosts({ author: authorId });
 
     if (response && response.data) {
-      return response.data.map((post: any) => ({
-        id: post._id || post.id,
+      return response.data.map((post: ApiPost): Post => ({
+        _id: post._id,
         title: post.title,
         excerpt: post.summary || post.excerpt,
         slug: post.slug,
@@ -143,7 +174,7 @@ export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
         publishedAt: post.publishedAt,
         author: post.author
           ? {
-              id: post.author._id || post.author.id,
+              _id: post.author._id,
               name: post.author.name,
               username: post.author.username,
             }
@@ -151,7 +182,7 @@ export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
         tags: post.tags || [],
         commentCount: post.commentCount || 0,
         likeCount: post.likes?.length || 0,
-        status: post.status,
+        status: post.status as "draft" | "published",
         coverImage:
           post.featuredImageUrl || post.coverImage || "/images/placeholder.jpg",
       }));
@@ -168,8 +199,8 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
     const response = await postApi.getPosts(convertParams({ tag }));
 
     if (response && response.data) {
-      return response.data.map((post) => ({
-        id: post._id,
+      return response.data.map((post): Post => ({
+        _id: post._id,
         title: post.title,
         excerpt: post.summary,
         slug: post.slug,
@@ -180,7 +211,7 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
         publishedAt: post.publishedAt,
         author: post.author
           ? {
-              id: post.author._id,
+              _id: post.author._id,
               name: post.author.name,
               username: post.author.username,
             }
@@ -188,7 +219,7 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
         tags: post.tags,
         commentCount: 0,
         likeCount: post.likes?.length || 0,
-        status: post.status,
+        status: post.status as "draft" | "published",
         coverImage: "/images/placeholder.jpg",
       }));
     }
@@ -199,14 +230,27 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
   }
 }
 
-export function formatPost(post: any): Post {
+export function formatPost(post: ApiPost): Post {
   return {
-    ...post,
-    id: post._id,
+    _id: post._id,
+    title: post.title,
+    content: post.content,
+    excerpt: post.summary || post.excerpt,
+    slug: post.slug,
+    status: post.status as "draft" | "published",
+    viewCount: post.views,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    publishedAt: post.publishedAt,
     author: {
-      id: post.author._id,
+      _id: post.author._id,
       name: post.author.name,
       username: post.author.username,
     },
+    tags: post.tags,
+    commentCount: post.commentCount || 0,
+    likeCount: post.likes?.length || 0,
+    coverImage: post.coverImage || "/images/placeholder.jpg",
+    readingTime: post.readingTime,
   };
 }

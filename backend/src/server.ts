@@ -1,11 +1,13 @@
 import express, { Request, Response, NextFunction, Express } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import path from "path";
 import connectDB from "./config/database";
 import authRoutes from "./routes/authRoutes";
 import postRoutes from "./routes/postRoutes";
 import tagRoutes from "./routes/tagRoutes";
 import profileRoutes from "./routes/profileRoutes";
+import uploadRoutes from "./routes/uploadRoutes";
 import logger from "./utils/logger";
 import config, { bootstrapConfig } from "./config/config";
 
@@ -25,6 +27,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+
+// Serve static files from the uploads directory
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   logger.http(`${req.method} ${req.url}`);
@@ -55,6 +60,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/tags", tagRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 app.get("/health", (req: Request, res: Response) => {
   res.status(200).json({

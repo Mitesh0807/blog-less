@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import Link from "next/link";
 import { authApi } from "@/app/api";
+import { getErrorMessage } from "@/lib/types/errors";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -42,8 +43,8 @@ export default function ForgotPasswordPage() {
     try {
       await authApi.requestPasswordReset({ email: data.email });
       setSuccess(true);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "An error occurred. Please try again.");
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -55,7 +56,7 @@ export default function ForgotPasswordPage() {
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Check your email</h1>
           <p className="text-slate-500">
-            We've sent you a link to reset your password. Please check your email.
+            We&apos;ve sent you a link to reset your password. Please check your email.
           </p>
         </div>
         <div className="text-center">
@@ -72,7 +73,7 @@ export default function ForgotPasswordPage() {
       <div className="space-y-2 text-center">
         <h1 className="text-3xl font-bold">Forgot your password?</h1>
         <p className="text-slate-500">
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we&apos;ll send you a link to reset your password.
         </p>
       </div>
 

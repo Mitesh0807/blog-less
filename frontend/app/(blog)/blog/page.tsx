@@ -62,23 +62,26 @@ async function searchPosts(formData: FormData) {
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     page?: string;
     tag?: string;
     author?: string;
     sort?: string;
     search?: string;
-  };
+  }>;
 }) {
-  const page = (await searchParams.page)
-    ? parseInt((await searchParams.page) ?? "1")
+  const resolvedParams = await searchParams;
+
+  const page = (await resolvedParams.page)
+    ? parseInt((await resolvedParams.page) ?? "1")
     : 1;
-  const tag = parseAsString.parseServerSide(searchParams.tag) || undefined;
+  const tag = parseAsString.parseServerSide(resolvedParams.tag) || undefined;
   const author =
-    parseAsString.parseServerSide(searchParams.author) || undefined;
-  const sort = parseAsString.parseServerSide(searchParams.sort) || "-createdAt";
+    parseAsString.parseServerSide(resolvedParams.author) || undefined;
+  const sort =
+    parseAsString.parseServerSide(resolvedParams.sort) || "-createdAt";
   const search =
-    parseAsString.parseServerSide(searchParams.search) || undefined;
+    parseAsString.parseServerSide(resolvedParams.search) || undefined;
 
   const params: PostParams = {
     page,
@@ -129,7 +132,7 @@ export default async function BlogPage({
             {tag && (
               <div className="flex items-center gap-1 bg-white px-3 py-1 rounded-full text-sm border">
                 <span>Tag: {tag}</span>
-                <Link href={generateFilterUrl(searchParams, { tag: null })}>
+                <Link href={generateFilterUrl(resolvedParams, { tag: null })}>
                   <span className="text-slate-400 hover:text-slate-800 ml-1">
                     ×
                   </span>
@@ -140,7 +143,9 @@ export default async function BlogPage({
             {author && (
               <div className="flex items-center gap-1 bg-white px-3 py-1 rounded-full text-sm border">
                 <span>Author: {author}</span>
-                <Link href={generateFilterUrl(searchParams, { author: null })}>
+                <Link
+                  href={generateFilterUrl(resolvedParams, { author: null })}
+                >
                   <span className="text-slate-400 hover:text-slate-800 ml-1">
                     ×
                   </span>
@@ -151,7 +156,9 @@ export default async function BlogPage({
             {search && (
               <div className="flex items-center gap-1 bg-white px-3 py-1 rounded-full text-sm border">
                 <span>Search: {search}</span>
-                <Link href={generateFilterUrl(searchParams, { search: null })}>
+                <Link
+                  href={generateFilterUrl(resolvedParams, { search: null })}
+                >
                   <span className="text-slate-400 hover:text-slate-800 ml-1">
                     ×
                   </span>
@@ -168,31 +175,30 @@ export default async function BlogPage({
         </div>
       )}
 
-      {/* Sorting dropdown - needs client component due to onChange handler */}
       <div className="flex justify-end items-center mb-6">
         <div className="hidden sm:flex mr-4 text-sm text-slate-600">
           <span className="mr-2">Sort by:</span>
           <div className="flex gap-2">
             <Link
-              href={generateFilterUrl(searchParams, { sort: "-createdAt" })}
+              href={generateFilterUrl(resolvedParams, { sort: "-createdAt" })}
               className={`px-2 py-1 rounded ${sort === "-createdAt" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
             >
               Newest
             </Link>
             <Link
-              href={generateFilterUrl(searchParams, { sort: "createdAt" })}
+              href={generateFilterUrl(resolvedParams, { sort: "createdAt" })}
               className={`px-2 py-1 rounded ${sort === "createdAt" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
             >
               Oldest
             </Link>
             <Link
-              href={generateFilterUrl(searchParams, { sort: "-views" })}
+              href={generateFilterUrl(resolvedParams, { sort: "-views" })}
               className={`px-2 py-1 rounded ${sort === "-views" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
             >
               Popular
             </Link>
             <Link
-              href={generateFilterUrl(searchParams, { sort: "title" })}
+              href={generateFilterUrl(resolvedParams, { sort: "title" })}
               className={`px-2 py-1 rounded ${sort === "title" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
             >
               A-Z
@@ -200,7 +206,6 @@ export default async function BlogPage({
           </div>
         </div>
 
-        {/* Only show dropdown on small screens */}
         <div className="sm:hidden">
           <SortForm
             action="/blog"
@@ -237,14 +242,14 @@ export default async function BlogPage({
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {posts.map((post) => (
-                  <BlogCard key={post.id} post={post} />
+                  <BlogCard key={post._id} post={post} />
                 ))}
               </div>
 
               <div className="flex justify-center mt-10 space-x-2">
                 {page > 1 && (
                   <Link
-                    href={generateFilterUrl(searchParams, { page: page - 1 })}
+                    href={generateFilterUrl(resolvedParams, { page: page - 1 })}
                   >
                     <Button variant="outline" size="sm">
                       Previous
@@ -258,7 +263,7 @@ export default async function BlogPage({
 
                 {posts.length === 9 && (
                   <Link
-                    href={generateFilterUrl(searchParams, { page: page + 1 })}
+                    href={generateFilterUrl(resolvedParams, { page: page + 1 })}
                   >
                     <Button variant="outline" size="sm">
                       Next

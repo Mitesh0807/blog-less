@@ -15,9 +15,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Blog-Less - A minimalist blog platform",
-  description: "A modern, minimalist blogging platform built with Next.js and TypeScript",
+  description:
+    "A modern, minimalist blogging platform built with Next.js and TypeScript",
 };
-
+export const dynamic = "force-dynamic";
 export default function RootLayout({
   children,
 }: Readonly<{

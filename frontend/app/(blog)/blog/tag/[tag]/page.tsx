@@ -10,9 +10,10 @@ import { redirect } from "next/navigation";
 export async function generateMetadata({
   params,
 }: {
-  params: { tag: string };
+  params: Promise<{ tag: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }): Promise<Metadata> {
-  const tagParam = params.tag;
+  const tagParam = (await params).tag;
   const tag = decodeURIComponent(tagParam);
 
   return {
@@ -22,8 +23,8 @@ export async function generateMetadata({
 }
 
 interface TagPageProps {
-  params: { tag: string };
-  searchParams: { page?: string; sort?: string };
+  params: Promise<{ tag: string }>;
+  searchParams: Promise<{ page?: string; sort?: string }>;
 }
 
 function generateFilterUrl(
@@ -72,11 +73,12 @@ async function sortPosts(formData: FormData) {
 }
 
 export default async function TagPage({ params, searchParams }: TagPageProps) {
-  const tagParam = params.tag;
+  const tagParam = (await params).tag;
   const tag = decodeURIComponent(tagParam);
-
-  const page = searchParams.page ? parseInt(searchParams.page) : 1;
-  const sort = parseAsString.parseServerSide(searchParams.sort) || "-createdAt";
+  const resolvedParams = await searchParams;
+  const page = resolvedParams.page ? parseInt(resolvedParams.page) : 1;
+  const sort =
+    parseAsString.parseServerSide(resolvedParams.sort) || "-createdAt";
 
   const posts = await getAllPosts({
     tag,
@@ -136,7 +138,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
             <div className="text-sm text-slate-600 mb-1">Sort by:</div>
             <div className="flex gap-2">
               <Link
-                href={generateFilterUrl(tag, searchParams, {
+                href={generateFilterUrl(tag, resolvedParams, {
                   sort: "-createdAt",
                 })}
                 className={`px-2 py-1 rounded text-sm ${sort === "-createdAt" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
@@ -144,7 +146,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
                 Newest
               </Link>
               <Link
-                href={generateFilterUrl(tag, searchParams, {
+                href={generateFilterUrl(tag, resolvedParams, {
                   sort: "createdAt",
                 })}
                 className={`px-2 py-1 rounded text-sm ${sort === "createdAt" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
@@ -152,13 +154,15 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
                 Oldest
               </Link>
               <Link
-                href={generateFilterUrl(tag, searchParams, { sort: "-views" })}
+                href={generateFilterUrl(tag, resolvedParams, {
+                  sort: "-views",
+                })}
                 className={`px-2 py-1 rounded text-sm ${sort === "-views" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
               >
                 Popular
               </Link>
               <Link
-                href={generateFilterUrl(tag, searchParams, { sort: "title" })}
+                href={generateFilterUrl(tag, resolvedParams, { sort: "title" })}
                 className={`px-2 py-1 rounded text-sm ${sort === "title" ? "bg-slate-100 font-medium" : "hover:bg-slate-50"}`}
               >
                 A-Z
@@ -191,14 +195,16 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
         <div className="space-y-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
-              <BlogCard key={post.id} post={post} />
+              <BlogCard key={post._id} post={post} />
             ))}
           </div>
 
           <div className="flex justify-center mt-10 space-x-2">
             {page > 1 && (
               <Link
-                href={generateFilterUrl(tag, searchParams, { page: page - 1 })}
+                href={generateFilterUrl(tag, resolvedParams, {
+                  page: page - 1,
+                })}
               >
                 <Button variant="outline" size="sm">
                   Previous
@@ -212,7 +218,9 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
 
             {posts.length === 9 && (
               <Link
-                href={generateFilterUrl(tag, searchParams, { page: page + 1 })}
+                href={generateFilterUrl(tag, resolvedParams, {
+                  page: page + 1,
+                })}
               >
                 <Button variant="outline" size="sm">
                   Next

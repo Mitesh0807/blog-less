@@ -17,14 +17,15 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/app/api";
+import { getErrorMessage } from "@/lib/types/errors";
 
-// Login schema
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters" }),
 });
 
-// Register schema
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   username: z
@@ -38,8 +39,12 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters" })
-    .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-    .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
+    .regex(/[A-Z]/, {
+      message: "Password must contain at least one uppercase letter",
+    })
+    .regex(/[a-z]/, {
+      message: "Password must contain at least one lowercase letter",
+    })
     .regex(/[0-9]/, { message: "Password must contain at least one number" }),
 });
 
@@ -56,12 +61,12 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Create the form with the appropriate schema
   const form = useForm<LoginFormValues | RegisterFormValues>({
     resolver: zodResolver(type === "login" ? loginSchema : registerSchema),
-    defaultValues: type === "login"
-      ? { email: "", password: "" }
-      : { name: "", username: "", email: "", password: "" },
+    defaultValues:
+      type === "login"
+        ? { email: "", password: "" }
+        : { name: "", username: "", email: "", password: "" },
   });
 
   async function onSubmit(data: LoginFormValues | RegisterFormValues) {
@@ -83,16 +88,9 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
       }
       router.push(redirectUrl);
       router.refresh();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Auth error:", err);
-      // Display meaningful error messages
-      if (err.message) {
-        setError(err.message);
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("An error occurred. Please try again.");
-      }
+      setError(getErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +155,11 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="name@example.com" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="name@example.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -192,9 +194,25 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <div className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 {type === "login" ? "Signing in..." : "Creating account..."}
               </div>
@@ -208,8 +226,11 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
       <div className="text-center text-sm">
         {type === "login" ? (
           <p>
-            Don't have an account?{" "}
-            <Link href="/auth/register" className="text-blue-600 hover:underline">
+            Don&apos;t have an account?{" "}
+            <Link
+              href="/auth/register"
+              className="text-blue-600 hover:underline"
+            >
               Create one
             </Link>
           </p>
