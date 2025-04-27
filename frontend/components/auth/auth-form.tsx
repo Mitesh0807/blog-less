@@ -183,7 +183,7 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
           {type === "login" && (
             <div className="text-right">
               <Link
-                href="/auth/forgot-password"
+                href="/forgot-password"
                 className="text-sm text-blue-600 hover:underline"
               >
                 Forgot password?
@@ -227,10 +227,7 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
         {type === "login" ? (
           <p>
             Don&apos;t have an account?{" "}
-            <Link
-              href="/auth/register"
-              className="text-blue-600 hover:underline"
-            >
+            <Link href="/register" className="text-blue-600 hover:underline">
               Create one
             </Link>
           </p>

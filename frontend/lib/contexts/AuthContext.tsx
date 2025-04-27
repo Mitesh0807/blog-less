@@ -1,8 +1,13 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useCurrentUser, useLogin, useLogout, useRegister } from '../hooks/useAuth';
-import { User, LoginCredentials, RegisterData } from '../types/user';
+import React, { createContext, useContext, ReactNode } from "react";
+import {
+  useCurrentUser,
+  useLogin,
+  useLogout,
+  useRegister,
+} from "../hooks/useAuth";
+import { User, LoginCredentials, RegisterData } from "../types/user";
 
 interface AuthContextType {
   user: User | null;
@@ -25,15 +30,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logoutMutation = useLogout();
   const registerMutation = useRegister();
 
-  // Only consider authenticated if we have a valid user object
-  const isAuthenticated = !!user &&
-    typeof user === 'object' &&
-    'id' in user &&
-    'email' in user;
+  const isAuthenticated =
+    !!user && typeof user === "object" && "_id" in user && "email" in user;
 
-  // Log any auth errors to make debugging easier
   if (isError && error) {
-    console.error('Auth context error:', error);
+    console.error("Auth context error:", error);
   }
 
   const value = {
@@ -55,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

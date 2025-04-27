@@ -58,7 +58,7 @@ export const authApi = {
   },
 
   logout: async (): Promise<void> => {
-    await api.post("/auth/logout");
+    await api.get("/auth/logout");
   },
 
   forgotPassword: async (
