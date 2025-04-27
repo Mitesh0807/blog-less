@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction, Express } from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import connectDB from "./config/database";
 import authRoutes from "./routes/authRoutes";
 import postRoutes from "./routes/postRoutes";
@@ -14,11 +15,39 @@ connectDB();
 
 const app: Express = express();
 
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   logger.http(`${req.method} ${req.url}`);
+  next();
+});
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    process.env.FRONTEND_URL || "http://localhost:3000",
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  );
+
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
+
   next();
 });
 
@@ -55,7 +84,7 @@ app.use((req: Request, res: Response) => {
   logger.warn(`Route not found: ${req.originalUrl}`);
   res.status(404).json({
     success: false,
-    message: `Route not found: ${req.originalUrl}`
+    message: `Route not found: ${req.originalUrl}`,
   });
 });
 
@@ -64,8 +93,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
   res.status(500).json({
     success: false,
-    message: 'Server Error',
-    error: config.NODE_ENV === 'development' ? err.message : undefined
+    message: "Server Error",
+    error: config.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 
