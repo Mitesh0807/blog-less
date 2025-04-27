@@ -2,6 +2,8 @@ import axiosClient from "./axiosClient";
 
 export interface User {
   id: string;
+  name: string;
+  username: string;
   email: string;
   role: "user" | "admin";
   createdAt: string;
@@ -12,7 +14,7 @@ export interface RegisterData {
   email: string;
   password: string;
   username: string;
-  displayName: string;
+  name: string;
 }
 
 export interface LoginData {
@@ -42,25 +44,31 @@ export const authApi = {
 
   login: async (credentials: LoginData): Promise<AuthResponse> => {
     const response = await axiosClient.post("/auth/login", credentials);
-
-    if (response.data.data.token) {
-      localStorage.setItem("auth_token", response.data.data.token);
-    }
-
     return response.data.data;
   },
 
   logout: async (): Promise<{ message: string }> => {
     const response = await axiosClient.post("/auth/logout");
-
-    localStorage.removeItem("auth_token");
-
     return response.data;
   },
 
   getCurrentUser: async (): Promise<User> => {
-    const response = await axiosClient.get("/auth/me");
-    return response.data.data;
+    try {
+      const response = await axiosClient.get("/auth/me");
+      // Transform backend user format to our User type
+      return {
+        id: response.data._id,
+        name: response.data.name || "",
+        username: response.data.username || "",
+        email: response.data.email,
+        role: response.data.role || "user",
+        createdAt: response.data.createdAt,
+        updatedAt: response.data.updatedAt
+      };
+    } catch (error: unknown) {
+      console.error("Error fetching current user:", error);
+      throw new Error("Failed to fetch user");
+    }
   },
 
   requestPasswordReset: async (
