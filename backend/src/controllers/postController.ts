@@ -143,8 +143,12 @@ export const getPostBySlug = async (
       });
     }
 
-    const postAuthor = post.author as unknown as { _id: mongoose.Types.ObjectId };
-    const user = req.user as IUser & { _id: mongoose.Types.ObjectId } | undefined;
+    const postAuthor = post.author as unknown as {
+      _id: mongoose.Types.ObjectId;
+    };
+    const user = req.user as
+      | (IUser & { _id: mongoose.Types.ObjectId })
+      | undefined;
 
     if (
       post.status !== "published" &&
@@ -224,10 +228,12 @@ export const updatePost = async (
       ];
 
       const tagsToRemove = oldTags.filter(
-        (tag) => !newTags.includes(tag.toString())
+        (tag) => !newTags.includes(tag.toString()),
       );
 
-      const tagsToAdd = newTags.filter((tag) => !oldTags.includes(tag as string));
+      const tagsToAdd = newTags.filter(
+        (tag) => !oldTags.includes(tag as string),
+      );
 
       await Promise.all([
         ...tagsToRemove.map(async (tagName) => {
@@ -454,6 +460,107 @@ export const getRecommendedPosts = async (
     });
   } catch (error: any) {
     logger.error(`Error getting recommended posts: ${error.message}`, error);
+    next(error);
+  }
+};
+
+export const getUserPosts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    const user = req.user as IUser & { _id: mongoose.Types.ObjectId };
+
+    const {
+      page = 1,
+      limit = 10,
+      sort = "-createdAt",
+      status,
+      search,
+    } = req.query;
+
+    let query: any = { author: user._id };
+
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const totalPosts = await Post.countDocuments(query);
+    const posts = await Post.find(query)
+      .populate("author", "name username")
+      .sort(sort as string)
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+
+    res.status(200).json({
+      success: true,
+      count: posts.length,
+      total: totalPosts,
+      pagination: {
+        currentPage: Number(page),
+        totalPages: Math.ceil(totalPosts / Number(limit)),
+      },
+      data: posts,
+    });
+  } catch (error: any) {
+    logger.error(`Error getting user posts: ${error.message}`, error);
+    next(error);
+  }
+};
+
+export const getUserPostsStats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    const user = req.user as IUser & { _id: mongoose.Types.ObjectId };
+
+    const [total, published, draft, postViews] = await Promise.all([
+      Post.countDocuments({ author: user._id }),
+      Post.countDocuments({ author: user._id, status: "published" }),
+      Post.countDocuments({ author: user._id, status: "draft" }),
+      Post.aggregate([
+        { $match: { author: user._id } },
+        { $group: { _id: null, total: { $sum: "$views" } } },
+      ]),
+    ]);
+
+    const views = postViews.length > 0 ? postViews[0].total : 0;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        total,
+        published,
+        draft,
+        views,
+      },
+    });
+  } catch (error: any) {
+    logger.error(`Error getting user post stats: ${error.message}`, error);
     next(error);
   }
 };

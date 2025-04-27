@@ -8,6 +8,8 @@ import {
   likePost,
   getFeaturedPosts,
   getRecommendedPosts,
+  getUserPosts,
+  getUserPostsStats,
 } from "../controllers/postController";
 import { protect } from "../middleware/auth";
 import { validatePostCreate, validatePostUpdate } from "../validators/postValidator";
@@ -21,6 +23,8 @@ router.route("/")
 
 router.get("/featured", asyncHandler(getFeaturedPosts));
 router.get("/recommended", protect, asyncHandler(getRecommendedPosts));
+router.get("/me", protect, asyncHandler(getUserPosts));
+router.get("/me/stats", protect, asyncHandler(getUserPostsStats));
 router.get("/:slug", asyncHandler(getPostBySlug));
 router.put("/:id", protect, validatePostUpdate, asyncHandler(updatePost));
 router.delete("/:id", protect, asyncHandler(deletePost));
