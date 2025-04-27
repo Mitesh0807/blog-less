@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ interface BlogImageProps {
   priority?: boolean;
   sizes?: string;
   aspectRatio?: string;
-  quality?: "low" | "medium" | "high";
+  quality?: number;
   style?: React.CSSProperties;
   width?: number;
   height?: number;
@@ -25,38 +25,25 @@ export function BlogImage({
   priority = false,
   sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw",
   aspectRatio = "16/9",
-  quality = "medium",
+  quality = 75,
   style,
   width,
   height,
   fill = false,
 }: BlogImageProps) {
-  const [loaded, setLoaded] = useState(false);
-  const [imgSrc, setImgSrc] = useState<string>(src);
-  const [blurSrc, setBlurSrc] = useState<string>("");
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    if (!src) return;
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
-    if (src.includes("thumb-")) {
-      setBlurSrc(src);
-      return;
-    }
+  // Determine if the source is a remote URL and format it properly
+  let imageSrc = src;
 
-    if (src.startsWith("/uploads/")) {
-      const pathParts = src.split("/");
-      const filename = pathParts[pathParts.length - 1];
-      setBlurSrc(`/uploads/thumbnails/thumb-${filename}`);
-    } else {
-      setBlurSrc(src);
-    }
-  }, [src]);
-
-  const qualityMap = {
-    low: 30,
-    medium: 75,
-    high: 90,
-  };
+  if (!src) {
+    imageSrc = "/images/placeholder.jpg";
+  } else if (src.startsWith("/uploads") || src.includes("/api/uploads/")) {
+    // If path is relative to backend but doesn't start with http
+    imageSrc = `${BACKEND_URL}${src.startsWith("/") ? "" : "/"}${src}`;
+  }
 
   return (
     <div
@@ -66,40 +53,19 @@ export function BlogImage({
         ...style,
       }}
     >
-      {blurSrc && !loaded && (
-        <Image
-          src={blurSrc}
-          alt={alt}
-          fill={fill || (!width && !height)}
-          width={width}
-          height={height}
-          className={cn(
-            "transition-opacity duration-300 object-cover",
-            loaded ? "opacity-0" : "opacity-100 scale-[1.02] blur-[10px]",
-          )}
-          sizes={sizes}
-          loading="eager"
-          style={{ aspectRatio }}
-        />
-      )}
-
       <Image
-        src={imgSrc}
-        alt={alt}
+        src={error ? "/images/placeholder.jpg" : imageSrc}
+        alt={alt || "Blog image"}
         fill={fill || (!width && !height)}
         width={width}
         height={height}
-        onLoadingComplete={() => setLoaded(true)}
-        className={cn(
-          "transition-opacity duration-500 object-cover",
-          loaded ? "opacity-100" : "opacity-0",
-        )}
+        className={cn("object-cover")}
         sizes={sizes}
-        quality={qualityMap[quality]}
+        quality={quality}
         priority={priority}
-        style={{ aspectRatio }}
         onError={() => {
-          setImgSrc("/images/placeholder.jpg");
+          console.error("Image failed to load:", imageSrc);
+          setError(true);
         }}
       />
     </div>

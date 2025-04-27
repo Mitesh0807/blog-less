@@ -132,7 +132,7 @@ export default async function BlogPostPage({
             alt={post.title}
             fill
             priority
-            quality="high"
+            quality={90}
             sizes="(max-width: 768px) 100vw, 1200px"
           />
         </div>

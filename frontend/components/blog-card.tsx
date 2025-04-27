@@ -18,7 +18,7 @@ export default function BlogCard({ post }: BlogCardProps) {
             src={post.coverImage || "/images/placeholder.jpg"}
             alt={post.title}
             fill
-            quality="low"
+            quality={50}
             aspectRatio="16/9"
           />
         </div>

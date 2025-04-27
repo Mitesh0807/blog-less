@@ -38,7 +38,7 @@ export function PostEditForm({ id }: { id: string }) {
     queryKey: ["post", id],
     queryFn: async () => {
       try {
-        const response = await axiosClient.get(`/posts/${id}`);
+        const response = await axiosClient.get(`/posts/id/${id}`);
         return response.data.data as Post;
       } catch (error) {
         console.error("Error fetching post:", error);

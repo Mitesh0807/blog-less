@@ -45,35 +45,51 @@ function convertParams(params: PostParams): PostSearchParams {
   };
 }
 
+function formatImagePath(imagePath?: string): string {
+  if (!imagePath) return "/images/placeholder.jpg";
+
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  if (imagePath.startsWith("/uploads/")) {
+    return `http://localhost:8080${imagePath}`;
+  }
+
+  return imagePath;
+}
+
 export async function getAllPosts(params: PostParams = {}): Promise<Post[]> {
   try {
     const response = await postApi.getPosts(convertParams(params));
 
     if (response && response.data) {
-      return response.data.map((post): Post => ({
-        _id: post._id,
-        title: post.title,
-        excerpt: post.summary,
-        slug: post.slug,
-        content: post.content,
-        viewCount: post.views,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        publishedAt: post.publishedAt,
-        author: post.author
-          ? {
-              _id: post.author._id,
-              name: post.author.name,
-              username: post.author.username,
-            }
-          : undefined,
-        tags: post.tags,
-        commentCount: 0,
-        likeCount: post.likes?.length || 0,
-        status: post.status as "draft" | "published",
-        coverImage: "/images/placeholder.jpg",
-        readingTime: post.readingTime,
-      }));
+      return response.data.map(
+        (post): Post => ({
+          _id: post._id,
+          title: post.title,
+          excerpt: post.summary,
+          slug: post.slug,
+          content: post.content,
+          viewCount: post.views,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          publishedAt: post.publishedAt,
+          author: post.author
+            ? {
+                _id: post.author._id,
+                name: post.author.name,
+                username: post.author.username,
+              }
+            : undefined,
+          tags: post.tags,
+          commentCount: 0,
+          likeCount: post.likes?.length || 0,
+          status: post.status as "draft" | "published",
+          coverImage: formatImagePath(post.coverImage),
+          readingTime: post.readingTime,
+        }),
+      );
     }
     return [];
   } catch (error) {
@@ -109,7 +125,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
         commentCount: 0,
         likeCount: post.likes?.length || 0,
         status: post.status as "draft" | "published",
-        coverImage: "/images/placeholder.jpg",
+        coverImage: formatImagePath(post.coverImage),
         readingTime:
           post.readingTime || Math.ceil(post.content.split(/\s+/).length / 200),
       };
@@ -126,29 +142,31 @@ export async function getFeaturedPosts(): Promise<Post[]> {
     const response = await postApi.getFeaturedPosts();
 
     if (response && response.data) {
-      return response.data.map((post): Post => ({
-        _id: post._id,
-        title: post.title,
-        excerpt: post.summary,
-        slug: post.slug,
-        content: post.content,
-        viewCount: post.views,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        publishedAt: post.publishedAt,
-        author: post.author
-          ? {
-              _id: post.author._id,
-              name: post.author.name,
-              username: post.author.username,
-            }
-          : undefined,
-        tags: post.tags,
-        commentCount: 0,
-        likeCount: post.likes?.length || 0,
-        status: post.status as "draft" | "published",
-        coverImage: "/images/placeholder.jpg",
-      }));
+      return response.data.map(
+        (post): Post => ({
+          _id: post._id,
+          title: post.title,
+          excerpt: post.summary,
+          slug: post.slug,
+          content: post.content,
+          viewCount: post.views,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          publishedAt: post.publishedAt,
+          author: post.author
+            ? {
+                _id: post.author._id,
+                name: post.author.name,
+                username: post.author.username,
+              }
+            : undefined,
+          tags: post.tags,
+          commentCount: 0,
+          likeCount: post.likes?.length || 0,
+          status: post.status as "draft" | "published",
+          coverImage: formatImagePath(post.coverImage),
+        }),
+      );
     }
     return [];
   } catch (error) {
@@ -162,30 +180,31 @@ export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
     const response = await postApi.getPosts({ author: authorId });
 
     if (response && response.data) {
-      return response.data.map((post: ApiPost): Post => ({
-        _id: post._id,
-        title: post.title,
-        excerpt: post.summary || post.excerpt,
-        slug: post.slug,
-        content: post.content,
-        viewCount: post.views || 0,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        publishedAt: post.publishedAt,
-        author: post.author
-          ? {
-              _id: post.author._id,
-              name: post.author.name,
-              username: post.author.username,
-            }
-          : undefined,
-        tags: post.tags || [],
-        commentCount: post.commentCount || 0,
-        likeCount: post.likes?.length || 0,
-        status: post.status as "draft" | "published",
-        coverImage:
-          post.featuredImageUrl || post.coverImage || "/images/placeholder.jpg",
-      }));
+      return response.data.map(
+        (post: ApiPost): Post => ({
+          _id: post._id,
+          title: post.title,
+          excerpt: post.summary || post.excerpt,
+          slug: post.slug,
+          content: post.content,
+          viewCount: post.views || 0,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          publishedAt: post.publishedAt,
+          author: post.author
+            ? {
+                _id: post.author._id,
+                name: post.author.name,
+                username: post.author.username,
+              }
+            : undefined,
+          tags: post.tags || [],
+          commentCount: post.commentCount || 0,
+          likeCount: post.likes?.length || 0,
+          status: post.status as "draft" | "published",
+          coverImage: formatImagePath(post.featuredImageUrl || post.coverImage),
+        }),
+      );
     }
     return [];
   } catch (error) {
@@ -199,29 +218,31 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
     const response = await postApi.getPosts(convertParams({ tag }));
 
     if (response && response.data) {
-      return response.data.map((post): Post => ({
-        _id: post._id,
-        title: post.title,
-        excerpt: post.summary,
-        slug: post.slug,
-        content: post.content,
-        viewCount: post.views,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        publishedAt: post.publishedAt,
-        author: post.author
-          ? {
-              _id: post.author._id,
-              name: post.author.name,
-              username: post.author.username,
-            }
-          : undefined,
-        tags: post.tags,
-        commentCount: 0,
-        likeCount: post.likes?.length || 0,
-        status: post.status as "draft" | "published",
-        coverImage: "/images/placeholder.jpg",
-      }));
+      return response.data.map(
+        (post): Post => ({
+          _id: post._id,
+          title: post.title,
+          excerpt: post.summary,
+          slug: post.slug,
+          content: post.content,
+          viewCount: post.views,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          publishedAt: post.publishedAt,
+          author: post.author
+            ? {
+                _id: post.author._id,
+                name: post.author.name,
+                username: post.author.username,
+              }
+            : undefined,
+          tags: post.tags,
+          commentCount: 0,
+          likeCount: post.likes?.length || 0,
+          status: post.status as "draft" | "published",
+          coverImage: "/images/placeholder.jpg",
+        }),
+      );
     }
     return [];
   } catch (error) {
@@ -248,9 +269,87 @@ export function formatPost(post: ApiPost): Post {
       username: post.author.username,
     },
     tags: post.tags,
-    commentCount: post.commentCount || 0,
+    commentCount: 0,
     likeCount: post.likes?.length || 0,
-    coverImage: post.coverImage || "/images/placeholder.jpg",
+    coverImage: formatImagePath(post.coverImage),
     readingTime: post.readingTime,
   };
+}
+
+export async function getPostById(id: string): Promise<Post | null> {
+  try {
+    const response = await postApi.getPostById(id);
+
+    if (response && response.data) {
+      const post = response.data;
+      return {
+        _id: post._id,
+        title: post.title,
+        excerpt: post.summary,
+        slug: post.slug,
+        content: post.content,
+        viewCount: post.views,
+        createdAt: post.createdAt,
+        updatedAt: post.updatedAt,
+        publishedAt: post.publishedAt,
+        author: post.author
+          ? {
+              _id: post.author._id,
+              name: post.author.name,
+              username: post.author.username,
+            }
+          : undefined,
+        tags: post.tags,
+        commentCount: 0,
+        likeCount: post.likes?.length || 0,
+        status: post.status as "draft" | "published",
+        coverImage: formatImagePath(post.coverImage),
+        readingTime:
+          post.readingTime || Math.ceil(post.content.split(/\s+/).length / 200),
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error fetching post with ID ${id}:`, error);
+    return null;
+  }
+}
+
+export async function getPostsByIds(ids: string[]): Promise<Post[]> {
+  try {
+    const response = await postApi.getPostsByIds(ids);
+
+    if (response && response.data) {
+      return response.data.map(
+        (post): Post => ({
+          _id: post._id,
+          title: post.title,
+          excerpt: post.summary,
+          slug: post.slug,
+          content: post.content,
+          viewCount: post.views,
+          createdAt: post.createdAt,
+          updatedAt: post.updatedAt,
+          publishedAt: post.publishedAt,
+          author: post.author
+            ? {
+                _id: post.author._id,
+                name: post.author.name,
+                username: post.author.username,
+              }
+            : undefined,
+          tags: post.tags,
+          commentCount: 0,
+          likeCount: post.likes?.length || 0,
+          status: post.status as "draft" | "published",
+          coverImage: formatImagePath(post.coverImage),
+          readingTime: post.readingTime,
+        }),
+      );
+    }
+    return [];
+  } catch (error) {
+    console.error(`Error fetching posts by IDs:`, error);
+    return [];
+  }
 }

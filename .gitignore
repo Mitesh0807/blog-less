@@ -101,3 +101,6 @@ test-results.xml
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+backend/uploads/posts
+backend/uploads/responsive
+backend/uploads/thumbnails

@@ -20,6 +20,7 @@ export interface PostResponse {
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
+  coverImage?: string;
 }
 
 export interface PostCreateData {
@@ -123,6 +124,16 @@ export const postApi = {
 
   getTags: async (): Promise<{ success: boolean; data: string[] }> => {
     const response = await axiosClient.get("/tags");
+    return response.data;
+  },
+
+  getPostById: async (id: string): Promise<GetPostResponse> => {
+    const response = await axiosClient.get(`/posts/id/${id}`);
+    return response.data;
+  },
+
+  getPostsByIds: async (ids: string[]): Promise<PostsResponse> => {
+    const response = await axiosClient.post("/posts/batch", { ids });
     return response.data;
   },
 };
