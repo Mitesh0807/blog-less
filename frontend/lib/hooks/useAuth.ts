@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import axiosClient from "@/app/api/axiosClient";
 
 interface User {
@@ -28,7 +28,6 @@ interface RegisterData {
   username: string;
   email: string;
   password: string;
-  confirmPassword: string;
 }
 
 interface ForgotPasswordData {
@@ -38,7 +37,6 @@ interface ForgotPasswordData {
 interface ResetPasswordData {
   token: string;
   password: string;
-  confirmPassword: string;
 }
 
 interface ProfileUpdateData {
@@ -53,9 +51,15 @@ interface AuthResponse {
   user: User;
 }
 
-function handleAxiosError(error: unknown, fallbackMessage: string) {
+interface ApiErrorResponse {
+  message: string;
+  status?: number;
+}
+
+function handleAxiosError(error: unknown, fallbackMessage: string): void {
   if (axios.isAxiosError(error) && error.response) {
-    toast.error(error.response.data.message || fallbackMessage);
+    const apiError = error as AxiosError<ApiErrorResponse>;
+    toast.error(apiError.response?.data?.message || fallbackMessage);
   } else {
     toast.error(fallbackMessage);
   }
