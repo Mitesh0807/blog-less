@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # MongoDB Service
+  mongodb:
+    image: mongo:latest
+    container_name: blog-less-mongodb
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=rootpassword
+      - MONGO_INITDB_DATABASE=blog-less
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - blog-less-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/blog-less --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: blog-less-backend
+    restart: always
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      - MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blog-less?authSource=admin
+      - JWT_SECRET=your_jwt_secret_key
+      - JWT_ALGORITHM=HS256
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - blog-less-network
+    command: >
+      sh -c "npm run seed && npm run dev"
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: blog-less-frontend
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
+      - NEXT_PUBLIC_UPLOAD_PATH=/uploads
+      - NEXT_PUBLIC_THUMBNAIL_PATH=/uploads/thumbnails
+      - NEXT_PUBLIC_IMAGE_QUALITY=75
+      - NEXT_PUBLIC_USE_IMAGE_OPTIMIZATION=true
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - blog-less-network
+
+networks:
+  blog-less-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
