@@ -55,7 +55,6 @@ export const authApi = {
   getCurrentUser: async (): Promise<User> => {
     try {
       const response = await axiosClient.get("/auth/me");
-      // Transform backend user format to our User type
       return {
         id: response.data._id,
         name: response.data.name || "",
@@ -63,7 +62,7 @@ export const authApi = {
         email: response.data.email,
         role: response.data.role || "user",
         createdAt: response.data.createdAt,
-        updatedAt: response.data.updatedAt
+        updatedAt: response.data.updatedAt,
       };
     } catch (error: unknown) {
       console.error("Error fetching current user:", error);

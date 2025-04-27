@@ -16,7 +16,6 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
-        {/* Hero section */}
         <section className="bg-slate-900 text-white py-16 md:py-24">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
@@ -43,7 +42,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured posts section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-10 text-center">
@@ -77,7 +75,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Recent posts section */}
         <section className="py-16 bg-slate-50">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-10 text-center">
@@ -111,7 +108,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Call to action section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-4">

@@ -14,7 +14,7 @@ export type {
 } from "./authApi";
 
 export interface Post {
-  id: string;
+  _id: string;
   title: string;
   content: string;
   excerpt?: string;
@@ -30,7 +30,7 @@ export interface Post {
   publishedAt?: string;
   readingTime?: number;
   author?: {
-    id: string;
+    _id: string;
     name: string;
     username: string;
   };

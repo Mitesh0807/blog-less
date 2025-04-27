@@ -2,8 +2,8 @@ import { getPostBySlug } from "@/lib/blog-service";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { BlogImage } from "@/components/blog-image";
 import { formatDate, getReadingTime, formatViewCount } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -130,12 +130,13 @@ export default async function BlogPostPage({
       {/* Cover image */}
       {post.coverImage && (
         <div className="relative w-full h-[400px] mb-8 rounded-lg overflow-hidden">
-          <Image
+          <BlogImage
             src={post.coverImage}
             alt={post.title}
             fill
-            className="object-cover"
             priority
+            quality="high"
+            sizes="(max-width: 768px) 100vw, 1200px"
           />
         </div>
       )}
