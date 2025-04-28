@@ -430,13 +430,6 @@ export const getRecommendedPosts = async (
   next: NextFunction,
 ) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "User not authenticated",
-      });
-    }
-
     const user = req.user as IUser;
 
     const userProfile = await mongoose.model("Profile").findOne({
