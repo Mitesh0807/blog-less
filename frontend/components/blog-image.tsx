@@ -33,15 +33,14 @@ export function BlogImage({
 }: BlogImageProps) {
   const [error, setError] = useState(false);
 
-  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
+  const BACKEND_URL =
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
-  // Determine if the source is a remote URL and format it properly
   let imageSrc = src;
 
   if (!src) {
     imageSrc = "/images/placeholder.jpg";
   } else if (src.startsWith("/uploads") || src.includes("/api/uploads/")) {
-    // If path is relative to backend but doesn't start with http
     imageSrc = `${BACKEND_URL}${src.startsWith("/") ? "" : "/"}${src}`;
   }
 
@@ -64,7 +63,6 @@ export function BlogImage({
         quality={quality}
         priority={priority}
         onError={() => {
-          console.error("Image failed to load:", imageSrc);
           setError(true);
         }}
       />
