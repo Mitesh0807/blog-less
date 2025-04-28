@@ -14,17 +14,21 @@ import {
   getUserPostsStats,
 } from "../controllers/postController";
 import { protect } from "../middleware/auth";
-import { validatePostCreate, validatePostUpdate } from "../validators/postValidator";
+import {
+  validatePostCreate,
+  validatePostUpdate,
+} from "../validators/postValidator";
 import { asyncHandler } from "../utils/controllerWrapper";
 
 const router = express.Router();
 
-router.route("/")
+router
+  .route("/")
   .get(asyncHandler(getPosts))
   .post(protect, validatePostCreate, asyncHandler(createPost));
 
 router.get("/featured", asyncHandler(getFeaturedPosts));
-router.get("/recommended", protect, asyncHandler(getRecommendedPosts));
+router.get("/recommended", asyncHandler(getRecommendedPosts));
 router.get("/me", protect, asyncHandler(getUserPosts));
 router.get("/me/stats", protect, asyncHandler(getUserPostsStats));
 router.post("/batch", asyncHandler(getPostsByIds));
