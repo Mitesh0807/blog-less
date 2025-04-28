@@ -1,17 +1,18 @@
-"use client";
-
-import { useFeaturedPosts, usePosts } from "@/lib/hooks/usePosts";
-import BlogCard from "@/components/blog-card";
 import Link from "next/link";
+import FeaturedPosts from "@/components/featured-posts";
+import RecommendedPosts from "@/components/recommended-posts";
+import { getFeaturedPosts, getRecommendedPosts } from "@/lib/api-services";
 
-export default function Home() {
-  const { data: featuredPostsData, isLoading: isFeaturedLoading } =
-    useFeaturedPosts();
-  const { data: recentPostsData, isLoading: isRecentLoading } = usePosts({
-    page: 1,
-    limit: 6,
-    sort: "-publishedAt",
-  });
+export default async function Home() {
+  const [featuredPostsResult, recommendedPostsResult] = await Promise.allSettled([
+    getFeaturedPosts(),
+    getRecommendedPosts(),
+  ]);
+
+  const featuredPosts =
+    featuredPostsResult.status === "fulfilled" ? featuredPostsResult.value : [];
+  const recommendedPosts =
+    recommendedPostsResult.status === "fulfilled" ? recommendedPostsResult.value : [];
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -42,71 +43,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-10 text-center">
-              Featured Posts
-            </h2>
+        {featuredPosts.length > 0 && (
+          <FeaturedPosts posts={featuredPosts} />
+        )}
 
-            {isFeaturedLoading && (
-              <div className="text-center py-8">Loading featured posts...</div>
-            )}
-
-            {featuredPostsData && featuredPostsData.data.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredPostsData.data.map((post) => (
-                  <BlogCard key={post._id} post={post} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-slate-600">
-                No featured posts found.
-              </div>
-            )}
-
-            <div className="text-center mt-10">
-              <Link
-                href="/blog"
-                className="text-slate-900 font-medium hover:underline"
-              >
-                View all posts &rarr;
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-16 bg-slate-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-10 text-center">
-              Recent Posts
-            </h2>
-
-            {isRecentLoading && (
-              <div className="text-center py-8">Loading recent posts...</div>
-            )}
-
-            {recentPostsData && recentPostsData.data.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {recentPostsData.data.map((post) => (
-                  <BlogCard key={post._id} post={post} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-slate-600">
-                No recent posts found.
-              </div>
-            )}
-
-            <div className="text-center mt-10">
-              <Link
-                href="/blog"
-                className="text-slate-900 font-medium hover:underline"
-              >
-                View all posts &rarr;
-              </Link>
-            </div>
-          </div>
-        </section>
+        {recommendedPosts.length > 0 && (
+          <RecommendedPosts posts={recommendedPosts} />
+        )}
 
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4 text-center">

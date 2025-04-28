@@ -15,25 +15,26 @@ export type PostFilters = {
 };
 
 export const postKeys = {
-  all: ["posts"] as const,
-  lists: () => [...postKeys.all, "list"] as const,
-  list: (filters: PostFilters) =>
-    [...postKeys.lists(), filters] as const,
-  details: () => [...postKeys.all, "detail"] as const,
-  detail: (slug: string) => [...postKeys.details(), slug] as const,
-  featured: () => [...postKeys.all, "featured"] as const,
-  recommended: () => [...postKeys.all, "recommended"] as const,
+  all: ["posts"],
+  lists: () => [...postKeys.all, "list"],
+  list: (filters: PostFilters) => [...postKeys.lists(), filters],
+  details: () => [...postKeys.all, "detail"],
+  detail: (slug: string) => [...postKeys.details(), slug],
+  featured: () => [...postKeys.all, "featured"],
+  recommended: () => [...postKeys.all, "recommended"],
+};
+
+export const fetchRecentPosts = async (params: PostFilters = {}) => {
+  const response = await api.get<PaginatedResponse<Post>>("/posts", {
+    params,
+  });
+  return response.data;
 };
 
 export function usePosts(params: PostFilters = {}) {
   return useQuery({
     queryKey: postKeys.list(params),
-    queryFn: async () => {
-      const response = await api.get<PaginatedResponse<Post>>("/posts", {
-        params,
-      });
-      return response.data;
-    },
+    queryFn: fetchFeaturedPosts,
   });
 }
 
@@ -53,17 +54,21 @@ export function usePost(slug: string) {
   });
 }
 
+export interface FetaturedPosts {
+  success: boolean;
+  count: number;
+  data: Post[];
+}
+
+export const fetchFeaturedPosts = async () => {
+  const response = await api.get<FetaturedPosts>("/posts/featured");
+  return response.data;
+};
+
 export function useFeaturedPosts() {
   return useQuery({
-    queryKey: postKeys.featured(),
-    queryFn: async () => {
-      const response = await api.get<{
-        success: boolean;
-        count: number;
-        data: Post[];
-      }>("/posts/featured");
-      return response.data;
-    },
+    queryKey: ["posts", "featured"],
+    queryFn: fetchFeaturedPosts,
   });
 }
 
