@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/app/api";
 import { getErrorMessage } from "@/lib/types/errors";
+import { useQueryClient } from "@tanstack/react-query";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -69,6 +70,7 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
         : { name: "", username: "", email: "", password: "" },
   });
 
+  const queryClient = useQueryClient();
   async function onSubmit(data: LoginFormValues | RegisterFormValues) {
     setIsLoading(true);
     setError(null);
@@ -86,6 +88,7 @@ export function AuthForm({ type, redirectUrl = "/" }: AuthFormProps) {
           name: registerData.name,
         });
       }
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       router.push(redirectUrl);
       router.refresh();
     } catch (err) {
