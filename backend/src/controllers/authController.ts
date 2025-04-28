@@ -21,8 +21,8 @@ const cookieOptions = {
     Date.now() + config.COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
   ),
   httpOnly: true,
-  secure: config.NODE_ENV === "production",
-  sameSite: "strict" as const,
+  secure: true,
+  sameSite: "none" as const,
 };
 
 const sendTokenResponse = (user: IUser, statusCode: number, res: Response) => {
