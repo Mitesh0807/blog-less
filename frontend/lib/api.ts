@@ -30,18 +30,24 @@ api.interceptors.response.use(
   (error) => {
     const { response } = error;
 
-    if (response && response.status === 401) {
-      console.error("Unauthorized access");
+    if (response && response.status !== 401) {
+      console.error(`API Error (${response.status}):`, error.message);
     }
 
     return Promise.reject(error);
   },
 );
 
-// Add same interceptors to publicApi
 publicApi.interceptors.response.use(
   (response) => response,
   (error) => {
+    const { response } = error;
+
+    // Log public API errors (these shouldn't be auth errors)
+    if (response) {
+      console.error(`Public API Error (${response.status}):`, error.message);
+    }
+
     return Promise.reject(error);
   },
 );

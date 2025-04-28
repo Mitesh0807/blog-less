@@ -9,7 +9,7 @@ import { Button } from "./ui/button";
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: user, isLoading } = useCurrentUser();
+  const { data: user, isLoading, isError } = useCurrentUser();
   const logout = useLogout();
 
   const toggleMobileMenu = () => {
@@ -20,7 +20,9 @@ export default function Header() {
     logout.mutate();
   };
 
-  const isAuthPage = pathname?.startsWith("/auth/");
+  const isAuthPage =
+    pathname?.startsWith("/login") || pathname?.startsWith("/register");
+  const isAuthenticated = !!user && !isError;
 
   return (
     <header className="border-b">
@@ -48,7 +50,7 @@ export default function Header() {
           >
             About
           </Link>
-          {user && (
+          {isAuthenticated && (
             <Link
               href="/dashboard"
               className={`text-sm font-medium hover:text-black/70 transition-colors ${pathname === "/dashboard" || pathname?.startsWith("/dashboard/") ? "text-black" : "text-black/60"}`}
@@ -61,8 +63,14 @@ export default function Header() {
         {!isAuthPage && (
           <div className="flex items-center space-x-4">
             {isLoading ? (
-              <div className="h-8 w-16 bg-slate-100 animate-pulse rounded"></div>
-            ) : user ? (
+              <div className="flex items-center space-x-4">
+                <Link href="/login">
+                  <Button variant="outline" size="sm">
+                    Log in
+                  </Button>
+                </Link>
+              </div>
+            ) : isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <div className="text-sm">
                   <span className="block font-medium">
@@ -142,7 +150,7 @@ export default function Header() {
             >
               About
             </Link>
-            {user && (
+            {isAuthenticated && (
               <Link
                 href="/dashboard"
                 className="text-sm font-medium hover:text-black/70 transition-colors"
@@ -150,7 +158,7 @@ export default function Header() {
                 Dashboard
               </Link>
             )}
-            {!isAuthPage && !user && !isLoading && (
+            {!isAuthPage && !isAuthenticated && !isLoading && (
               <div className="pt-2 border-t">
                 <Link href="/login" className="block py-2">
                   Log in
@@ -160,7 +168,7 @@ export default function Header() {
                 </Link>
               </div>
             )}
-            {user && (
+            {isAuthenticated && (
               <div className="pt-2 border-t">
                 <button
                   onClick={handleLogout}

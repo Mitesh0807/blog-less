@@ -23,8 +23,16 @@ export interface ForgotPasswordCredentials {
 
 export const authApi = {
   getCurrentUser: async (): Promise<User> => {
-    const response = await api.get("/auth/me");
-    return response.data.data;
+    try {
+      const response = await api.get("/auth/me");
+      return response.data.data;
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 401) {
+        return null as unknown as User;
+      }
+
+      throw error;
+    }
   },
 
   login: async (

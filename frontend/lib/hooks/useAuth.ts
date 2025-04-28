@@ -9,7 +9,14 @@ import { authApi } from "../api/auth";
 export function useCurrentUser() {
   return useQuery({
     queryKey: ["currentUser"],
-    queryFn: authApi.getCurrentUser,
+    queryFn: async () => {
+      try {
+        return await authApi.getCurrentUser();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (_) {
+        return null;
+      }
+    },
     retry: false,
     refetchOnWindowFocus: false,
     refetchInterval: 5 * 60 * 1000,
