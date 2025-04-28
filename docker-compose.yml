@@ -36,7 +36,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=8080
-      - MONGODB_URI=mongodb://mongodb:27017/blog-less
+      - MONGODB_URI=mongodb://root:rootpassword@mongodb:27017/blog-less?authSource=admin
       - JWT_SECRET=your_jwt_secret_key
       - JWT_ALGORITHM=HS256
       - CORS_ORIGIN=http://localhost:3000
@@ -61,7 +61,10 @@ services:
     depends_on:
       - backend
     environment:
+      # For host machine access, use localhost
       - NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
+      # For internal container network access
+      - NEXT_PUBLIC_API_URL=http://backend:8080/api
       - NEXT_PUBLIC_UPLOAD_PATH=/uploads
       - NEXT_PUBLIC_THUMBNAIL_PATH=/uploads/thumbnails
       - NEXT_PUBLIC_IMAGE_QUALITY=75

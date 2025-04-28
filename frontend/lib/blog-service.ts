@@ -1,5 +1,6 @@
-import { postApi, Post, PostParams } from "../app/api";
+import { Post, PostParams } from "../app/api";
 import { PostSearchParams } from "../app/api/postApi";
+import { publicApi } from "./api";
 
 // Define proper types for API responses
 interface ApiAuthor {
@@ -61,11 +62,12 @@ function formatImagePath(imagePath?: string): string {
 
 export async function getAllPosts(params: PostParams = {}): Promise<Post[]> {
   try {
-    const response = await postApi.getPosts(convertParams(params));
+    const apiParams = convertParams(params);
+    const response = await publicApi.get("/posts", { params: apiParams });
 
-    if (response && response.data) {
-      return response.data.map(
-        (post): Post => ({
+    if (response && response.data && response.data.data) {
+      return response.data.data.map(
+        (post: ApiPost): Post => ({
           _id: post._id,
           title: post.title,
           excerpt: post.summary,
@@ -100,10 +102,10 @@ export async function getAllPosts(params: PostParams = {}): Promise<Post[]> {
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   try {
-    const response = await postApi.getPost(slug);
+    const response = await publicApi.get(`/posts/${slug}`);
 
-    if (response && response.data) {
-      const post = response.data;
+    if (response && response.data && response.data.data) {
+      const post = response.data.data as ApiPost;
       return {
         _id: post._id,
         title: post.title,
@@ -139,11 +141,11 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 export async function getFeaturedPosts(): Promise<Post[]> {
   try {
-    const response = await postApi.getFeaturedPosts();
+    const response = await publicApi.get("/posts/featured");
 
-    if (response && response.data) {
-      return response.data.map(
-        (post): Post => ({
+    if (response && response.data && response.data.data) {
+      return response.data.data.map(
+        (post: ApiPost): Post => ({
           _id: post._id,
           title: post.title,
           excerpt: post.summary,
@@ -177,10 +179,10 @@ export async function getFeaturedPosts(): Promise<Post[]> {
 
 export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
   try {
-    const response = await postApi.getPosts({ author: authorId });
+    const response = await publicApi.get(`/posts/author/${authorId}`);
 
-    if (response && response.data) {
-      return response.data.map(
+    if (response && response.data && response.data.data) {
+      return response.data.data.map(
         (post: ApiPost): Post => ({
           _id: post._id,
           title: post.title,
@@ -215,11 +217,11 @@ export async function getPostsByAuthor(authorId: string): Promise<Post[]> {
 
 export async function getPostsByTag(tag: string): Promise<Post[]> {
   try {
-    const response = await postApi.getPosts(convertParams({ tag }));
+    const response = await publicApi.get(`/posts/tag/${tag}`);
 
-    if (response && response.data) {
-      return response.data.map(
-        (post): Post => ({
+    if (response && response.data && response.data.data) {
+      return response.data.data.map(
+        (post: ApiPost): Post => ({
           _id: post._id,
           title: post.title,
           excerpt: post.summary,
@@ -255,58 +257,37 @@ export function formatPost(post: ApiPost): Post {
   return {
     _id: post._id,
     title: post.title,
-    content: post.content,
     excerpt: post.summary || post.excerpt,
     slug: post.slug,
-    status: post.status as "draft" | "published",
-    viewCount: post.views,
+    content: post.content,
+    viewCount: post.views || 0,
     createdAt: post.createdAt,
     updatedAt: post.updatedAt,
     publishedAt: post.publishedAt,
-    author: {
-      _id: post.author._id,
-      name: post.author.name,
-      username: post.author.username,
-    },
-    tags: post.tags,
-    commentCount: 0,
+    author: post.author
+      ? {
+          _id: post.author._id,
+          name: post.author.name,
+          username: post.author.username,
+        }
+      : undefined,
+    tags: post.tags || [],
+    commentCount: post.commentCount || 0,
     likeCount: post.likes?.length || 0,
+    status: post.status as "draft" | "published",
     coverImage: formatImagePath(post.coverImage),
-    readingTime: post.readingTime,
+    readingTime:
+      post.readingTime || Math.ceil(post.content.split(/\s+/).length / 200),
   };
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
   try {
-    const response = await postApi.getPostById(id);
+    const response = await publicApi.get(`/posts/id/${id}`);
 
-    if (response && response.data) {
-      const post = response.data;
-      return {
-        _id: post._id,
-        title: post.title,
-        excerpt: post.summary,
-        slug: post.slug,
-        content: post.content,
-        viewCount: post.views,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        publishedAt: post.publishedAt,
-        author: post.author
-          ? {
-              _id: post.author._id,
-              name: post.author.name,
-              username: post.author.username,
-            }
-          : undefined,
-        tags: post.tags,
-        commentCount: 0,
-        likeCount: post.likes?.length || 0,
-        status: post.status as "draft" | "published",
-        coverImage: formatImagePath(post.coverImage),
-        readingTime:
-          post.readingTime || Math.ceil(post.content.split(/\s+/).length / 200),
-      };
+    if (response && response.data && response.data.data) {
+      const post = response.data.data as ApiPost;
+      return formatPost(post);
     }
     return null;
   } catch (error) {
@@ -317,35 +298,10 @@ export async function getPostById(id: string): Promise<Post | null> {
 
 export async function getPostsByIds(ids: string[]): Promise<Post[]> {
   try {
-    const response = await postApi.getPostsByIds(ids);
+    const response = await publicApi.post("/posts/batch", { ids });
 
-    if (response && response.data) {
-      return response.data.map(
-        (post): Post => ({
-          _id: post._id,
-          title: post.title,
-          excerpt: post.summary,
-          slug: post.slug,
-          content: post.content,
-          viewCount: post.views,
-          createdAt: post.createdAt,
-          updatedAt: post.updatedAt,
-          publishedAt: post.publishedAt,
-          author: post.author
-            ? {
-                _id: post.author._id,
-                name: post.author.name,
-                username: post.author.username,
-              }
-            : undefined,
-          tags: post.tags,
-          commentCount: 0,
-          likeCount: post.likes?.length || 0,
-          status: post.status as "draft" | "published",
-          coverImage: formatImagePath(post.coverImage),
-          readingTime: post.readingTime,
-        }),
-      );
+    if (response && response.data && response.data.data) {
+      return response.data.data.map((post: ApiPost): Post => formatPost(post));
     }
     return [];
   } catch (error) {

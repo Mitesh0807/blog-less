@@ -10,6 +10,14 @@ const api = axios.create({
   withCredentials: true,
 });
 
+export const publicApi = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: false,
+});
+
 api.interceptors.request.use(
   (config) => {
     return config;
@@ -26,6 +34,14 @@ api.interceptors.response.use(
       console.error("Unauthorized access");
     }
 
+    return Promise.reject(error);
+  },
+);
+
+// Add same interceptors to publicApi
+publicApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
     return Promise.reject(error);
   },
 );
