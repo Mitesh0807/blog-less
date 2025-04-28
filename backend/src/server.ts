@@ -35,26 +35,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.header(
-    "Access-Control-Allow-Origin",
-    process.env.FRONTEND_URL || "http://localhost:3000",
-  );
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
-  );
-
-  if (req.method === "OPTIONS") {
-    res.status(200).end();
-    return;
-  }
-
-  next();
-});
-
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/tags", tagRoutes);
