@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { Post } from "@/app/api";
 import { formatDate } from "@/lib/utils";
